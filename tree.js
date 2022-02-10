@@ -1,37 +1,26 @@
+import { generateRandomCloud } from "./cloud.js";
+import { generateRandomLuciole } from "./luciole.js";
+import { generateRandomSun } from "./sun.js";
+import { generateRandomMoon } from "./moon.js";
+
 const canvas = document.querySelector("canvas");
 const btnGenerate = document.querySelector(".button1");
 const btnSave = document.querySelector(".button2");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 1000;
+canvas.height = 1000;
 const ctx = canvas.getContext("2d");
 
-let sun = new Image();
 let step;
+let day;
 let isCurved;
 let curve;
 let curve2;
 let nbLeaf;
 let leafSize;
-//demi-circle
-//circle
-//star
-const leafForm = [
-  "ctx.arc(0, -len, leafSize, 0, Math.PI / 2)",
-  "ctx.arc(0, -len, 4, 0, 2 * Math.PI)",
-  `ctx.save()
-  ctx.beginPath();
-  ctx.translate(0, -len);
-  ctx.moveTo(0,0 - 7);
-  for (let i = 0; i < 5; i++) {
-      ctx.rotate(Math.PI / 5);
-      ctx.lineTo(0, 0 - (7*3));
-      ctx.rotate(Math.PI / 5);
-      ctx.lineTo(0, 0 - 7);
-  }
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();`,
-];
+let sunOrMoon;
+
+const DayColors = ["#C51F31", "#1B325F", "#F3A5AF", "#58B272", "#FBD46A"];
+const NightColors = ["#301A4D", "#410C0C", "#0E2B15", "#0E0F0D", "#0A0F2C"];
 
 btnGenerate.addEventListener("click", () => {
   generateRandomTree();
@@ -42,16 +31,18 @@ btnSave.addEventListener("click", () => {
 });
 
 function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
+  curve = Math.random() * 10 + 10;
   ctx.beginPath();
   ctx.save();
-  ctx.strokeStyle = LightenDarkenColor(color1, Math.random() * 5 - 5);
-  ctx.fillStyle = LightenDarkenColor(color2, Math.random() * 30 - 30);
+  ctx.strokeStyle = color1;
+  // ctx.fillStyle = LightenDarkenColor(color2, Math.random() * 30 - 30);
   ctx.shadowBlur = 10;
   ctx.shadowColor = "rgba(0,0,0,.5)";
   ctx.lineWidth = branchWidth;
   ctx.translate(startX, startY);
   ctx.rotate((angle * Math.PI) / 180);
   ctx.moveTo(0, 0);
+  //curved tree or not
   if (isCurved) {
     if (angle > 0) {
       ctx.bezierCurveTo(curve2, -len / 2, curve2, -len / 2, 0, -len);
@@ -61,68 +52,127 @@ function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
   } else {
     ctx.lineTo(0, -len);
   }
-
   ctx.stroke();
+
+  if (branchWidth > 10) {
+    ctx.save();
+    ctx.clip();
+
+    ctx.fillStyle = LightenDarkenColor(color1, 40);
+    // ctx.fillRect(0, -len, 140, 140);
+    ctx.arc(0, -len, 255, 0, Math.PI / 2);
+
+    ctx.restore();
+  }
+
+  //draw leaf
   if (len < nbLeaf) {
+    if (typeof color2 !== "string")
+      ctx.fillStyle = color2[Math.floor(Math.random() * color2.length)];
+    else ctx.fillStyle = getRandomColor();
     ctx.beginPath();
-    eval(leafForm[Math.floor(Math.random() * 1)]);
+    leafSize = Math.random() * 20 + 8;
+    ctx.arc(0, -len, leafSize, 0, Math.PI / 2);
     ctx.fill();
     ctx.restore();
     return;
   }
-  if (step < 10) {
-    console.log("test");
-    saveImage();
-  }
+  //  draw insect
+  // if (branchWidth > 50) {
+  //   ctx.drawImage(insect, -20, -len + 40, 20, 20);
+  // }
+
+  //  draw fruit
+  // if (step % 40 === 0 && step > 500 && branchWidth < 20) {
+  //   ctx.save();
+  //   ctx.rotate(1);
+  //   ctx.drawImage(pear, 0, -len, 20, 20);
+  //   ctx.restore();
+  // }
 
   drawTree(
     0,
     -len,
     len * 0.8,
     angle + curve,
-    branchWidth * 0.6,
+    branchWidth * (Math.random() * 0.05 + 0.55),
     color1,
     color2
   );
+
   drawTree(
     0,
     -len,
     len * 0.8,
     angle - curve,
-    branchWidth * 0.6,
+    branchWidth * (Math.random() * 0.05 + 0.55),
     color1,
     color2
   );
   ctx.restore();
-  //   if (step % 50 === 0) saveImage();
-  // console.log(step);
   step++;
 }
 
 export function generateRandomTree() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = getRandomColor();
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   step = 0;
 
   let centerPointX = canvas.width / 2;
-  let len = Math.floor(Math.random() * 50 + 120);
+  let len = Math.floor(Math.random() * 50 + 125);
   let angle = 0;
   let branchWidth = Math.random() * 70 + 1;
   let color1 = getRandomColor();
-  let color2 = getRandomColor();
+  let color2 = multiColor();
   curve = Math.random() * 10 + 10;
-  curve2 = Math.random() * 50;
-  nbLeaf = Math.random() * 12 + 8;
+  curve2 = Math.random() * 60;
+  nbLeaf = Math.random() * 13 + 9;
   leafSize = Math.random() * 20 + 8;
   isCurved = Math.floor(Math.random() * 6);
+  day = Math.floor(Math.random() * 2);
+  console.log(day);
+  if (Math.floor(Math.random() * 10) === 0) sunOrMoon = true;
+  else sunOrMoon = false;
+  let bgColor;
+  if (day) bgColor = DayColors[Math.floor(Math.random() * DayColors.length)];
+  else bgColor = NightColors[Math.floor(Math.random() * NightColors.length)];
 
-  // generateSun();
+  //draw
+  //bg
+  let gradient = ctx.createRadialGradient(
+    canvas.width / 2,
+    canvas.height / 2,
+    50,
+    canvas.width / 2,
+    canvas.height / 2,
+    canvas.height / 2
+  );
+
+  // Add three color stops
+  gradient.addColorStop(0, LightenDarkenColor(bgColor, 25));
+  gradient.addColorStop(0.9, bgColor);
+  gradient.addColorStop(1, bgColor);
+
+  // Set the fill style and draw a rectangle
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // ctx.fillStyle = bgColor;
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // generateRandomFlower();
+
+  if (!day) {
+    generateRandomLuciole();
+    if (sunOrMoon) generateRandomMoon();
+  } else {
+    if (sunOrMoon) generateRandomSun();
+  }
+  // generateRandomCloud();
 
   drawTree(
     centerPointX,
-    canvas.height,
+    canvas.height + 20,
     len,
     angle,
     branchWidth,
@@ -130,12 +180,6 @@ export function generateRandomTree() {
     color2
   );
 }
-
-const generateSun = () => {
-  ctx.drawImage(sun, 100, 400);
-
-  sun.src = "assets/sun.png";
-};
 
 const getRandomColor = () => {
   let letters = "0123456789ABCDEF";
@@ -154,6 +198,19 @@ const saveImage = (id) => {
   btnSave.href = image; // it will save locally
 };
 
+const multiColor = () => {
+  const percent = Math.random() * 100;
+
+  //55% chance
+  if (percent <= 55) return [getRandomColor()];
+  //25% chance
+  else if (percent <= 80) return [getRandomColor(), getRandomColor()];
+  //15% chance
+  else if (percent <= 95)
+    return [getRandomColor(), getRandomColor(), getRandomColor()];
+  //5% chance
+  else return "multicolor";
+};
 const LightenDarkenColor = (color, taux) => {
   let usePound = false;
   if (color[0] == "#") {

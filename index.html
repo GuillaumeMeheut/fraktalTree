@@ -8,12 +8,17 @@
   </head>
   <body>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
       div {
         position: relative;
       }
 
       canvas {
-        position: absolute;
+        /* position: absolute; */
         top: 0;
         left: 0;
         background: transparent;
@@ -25,13 +30,14 @@
         background: #1155fa;
       }
     </style>
-    <button class="button1">Generate button</button>
-    <a class="button2">Save img</a>
 
     <div>
       <canvas></canvas>
-      <canvas class="canvas2"></canvas>
+      <!-- <canvas class="canvas2"></canvas> -->
     </div>
+    <button class="button1">Generate button</button>
+    <a class="button2">Save img</a>
+
     <script type="module" src="main.js"></script>
   </body>
 </html>

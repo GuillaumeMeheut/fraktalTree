@@ -9,7 +9,7 @@ async function test(id) {
     const data = img.replace(/^data:image\/\w+;base64,/, "");
     const buf = Buffer.from(data, "base64");
 
-    const promise = writeFile(`image${id}.jpg`, buf);
+    const promise = writeFile(`generatedImg/image${id}.png`, buf);
     console.log(`Image ${id} succefully created`);
 
     await promise;
@@ -19,6 +19,6 @@ async function test(id) {
   }
 }
 
-for (let i = 1; i <= 5; i++) {
+for (let i = 1; i <= 100; i++) {
   test(i);
 }
