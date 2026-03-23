@@ -5,38 +5,122 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fraktal génération</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <style>
       * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
       }
 
-      div {
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0a0a0a;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
         position: relative;
       }
 
-      canvas {
-        /* position: absolute; */
-        top: 0;
-        left: 0;
-        background: transparent;
-        z-index: 5;
+      .canvas-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 0;
+        padding: 16px 16px 0 16px;
       }
 
-      button {
+      canvas {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      .controls {
+        display: flex;
+        gap: 12px;
+        padding: 16px;
         z-index: 20;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+
+      .btn-primary {
         background: #1155fa;
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: #3370ff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(17, 85, 250, 0.4);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ccc;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        transform: translateY(-1px);
       }
     </style>
 
-    <div>
-      <canvas></canvas>
-      <!-- <canvas class="canvas2"></canvas> -->
+    <div class="container">
+      <div class="canvas-wrapper">
+        <canvas></canvas>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary button1">Generate</button>
+        <a class="btn btn-secondary button2">Save image</a>
+      </div>
     </div>
-    <button class="button1">Generate button</button>
-    <a class="button2">Save img</a>
 
     <script type="module" src="main.js"></script>
   </body>
