@@ -10,6 +10,8 @@ canvas.width = 1000;
 canvas.height = 1000;
 const ctx = canvas.getContext("2d");
 
+const MAX_DEPTH = 13;
+
 let step;
 let day;
 let isCurved;
@@ -18,11 +20,13 @@ let curve2;
 let nbLeaf;
 let leafSize;
 let sunOrMoon;
+let isGenerating = false;
 
 const DayColors = ["#C51F31", "#1B325F", "#F3A5AF", "#58B272", "#FBD46A"];
 const NightColors = ["#301A4D", "#410C0C", "#0E2B15", "#0E0F0D", "#0A0F2C"];
 
 btnGenerate.addEventListener("click", () => {
+  if (isGenerating) return;
   generateRandomTree();
 });
 
@@ -30,14 +34,22 @@ btnSave.addEventListener("click", () => {
   saveImage();
 });
 
-function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
+function drawTree(startX, startY, len, angle, branchWidth, color1, color2, depth) {
+  if (depth > MAX_DEPTH) return;
+
   curve = Math.random() * 10 + 10;
   ctx.beginPath();
   ctx.save();
   ctx.strokeStyle = color1;
-  // ctx.fillStyle = LightenDarkenColor(color2, Math.random() * 30 - 30);
-  ctx.shadowBlur = 10;
-  ctx.shadowColor = "rgba(0,0,0,.5)";
+
+  if (depth === 0) {
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "rgba(0,0,0,.5)";
+  } else {
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+  }
+
   ctx.lineWidth = branchWidth;
   ctx.translate(startX, startY);
   ctx.rotate((angle * Math.PI) / 180);
@@ -59,7 +71,6 @@ function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
     ctx.clip();
 
     ctx.fillStyle = LightenDarkenColor(color1, 40);
-    // ctx.fillRect(0, -len, 140, 140);
     ctx.arc(0, -len, 255, 0, Math.PI / 2);
 
     ctx.restore();
@@ -77,18 +88,6 @@ function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
     ctx.restore();
     return;
   }
-  //  draw insect
-  // if (branchWidth > 50) {
-  //   ctx.drawImage(insect, -20, -len + 40, 20, 20);
-  // }
-
-  //  draw fruit
-  // if (step % 40 === 0 && step > 500 && branchWidth < 20) {
-  //   ctx.save();
-  //   ctx.rotate(1);
-  //   ctx.drawImage(pear, 0, -len, 20, 20);
-  //   ctx.restore();
-  // }
 
   drawTree(
     0,
@@ -97,7 +96,8 @@ function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
     angle + curve,
     branchWidth * (Math.random() * 0.05 + 0.55),
     color1,
-    color2
+    color2,
+    depth + 1
   );
 
   drawTree(
@@ -107,13 +107,17 @@ function drawTree(startX, startY, len, angle, branchWidth, color1, color2) {
     angle - curve,
     branchWidth * (Math.random() * 0.05 + 0.55),
     color1,
-    color2
+    color2,
+    depth + 1
   );
   ctx.restore();
   step++;
 }
 
 export function generateRandomTree() {
+  isGenerating = true;
+  btnGenerate.disabled = true;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   step = 0;
@@ -157,28 +161,28 @@ export function generateRandomTree() {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // ctx.fillStyle = bgColor;
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // generateRandomFlower();
-
   if (!day) {
     generateRandomLuciole();
     if (sunOrMoon) generateRandomMoon();
   } else {
     if (sunOrMoon) generateRandomSun();
   }
-  // generateRandomCloud();
 
-  drawTree(
-    centerPointX,
-    canvas.height + 20,
-    len,
-    angle,
-    branchWidth,
-    color1,
-    color2
-  );
+  requestAnimationFrame(() => {
+    drawTree(
+      centerPointX,
+      canvas.height + 20,
+      len,
+      angle,
+      branchWidth,
+      color1,
+      color2,
+      0
+    );
+
+    isGenerating = false;
+    btnGenerate.disabled = false;
+  });
 }
 
 const getRandomColor = () => {
